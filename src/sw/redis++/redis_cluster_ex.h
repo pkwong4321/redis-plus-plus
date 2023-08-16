@@ -14,12 +14,33 @@
    limitations under the License.
  *************************************************************************/
 
-#ifndef SEWENEW_REDISPLUSPLUS_REDISPLUSPLUS_H
-#define SEWENEW_REDISPLUSPLUS_REDISPLUSPLUS_H
+#ifndef SEWENEW_REDISPLUSPLUS_REDIS_CLUSTER_EX_H
+#define SEWENEW_REDISPLUSPLUS_REDIS_CLUSTER_EX_H
 
+#include <vector>
+#include "sw/redis++/redis_cluster.h"
 #include "sw/redis++/redis_ex.h"
-#include "sw/redis++/redis_cluster_ex.h"
-#include "sw/redis++/queued_redis.h"
-#include "sw/redis++/sentinel.h"
+#include "sw/redis++/cxx_utils.h"
 
-#endif // end SEWENEW_REDISPLUSPLUS_REDISPLUSPLUS_H
+namespace sw {
+
+namespace redis {
+
+class RedisClusterEx: public RedisCluster
+{
+public:
+    explicit RedisClusterEx(const ConnectionOptions &connection_opts,
+                            const ConnectionPoolOptions &pool_opts = {},
+                            Role role = Role::MASTER) : RedisCluster(connection_opts, pool_opts, role) {}
+
+    sw::redis::RedisEx redis(const Node &node, bool new_connection = true);
+
+    std::vector<Node> getShardNodes();
+    Node getNodeForKey(const StringView &key);
+};
+
+}
+
+}
+
+#endif

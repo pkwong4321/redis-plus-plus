@@ -1939,8 +1939,9 @@ public:
 
 private:
     friend class Redis;
-
+    friend class RedisEx;
     friend class RedisCluster;
+    friend class RedisClusterEx;
 
     template <typename ...Args>
     QueuedRedis(const ConnectionPoolSPtr &pool, bool new_connection, Args &&...args);

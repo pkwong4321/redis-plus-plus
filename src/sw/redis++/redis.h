@@ -3592,13 +3592,15 @@ public:
     long long xtrim(const StringView &key, const StringView &threshold,
             XtrimStrategy strategy, long long limit);
 
-private:
+protected:
     template <typename Impl>
     friend class QueuedRedis;
 
     friend class RedisCluster;
 
     // For internal use.
+    Redis(){};
+
     explicit Redis(const GuardedConnectionSPtr &connection);
 
     explicit Redis(const Uri &uri);

@@ -32,27 +32,27 @@ namespace sw {
 
 namespace redis {
 
-class Connection::Connector {
-public:
-    explicit Connector(const ConnectionOptions &opts);
+std::string ConnectionOptions::_server_info() const {
+    std::string info;
+    switch (type) {
+    case ConnectionType::TCP:
+        info = host + ":" + std::to_string(port);
+        break;
 
-    ContextUPtr connect() const;
+    case ConnectionType::UNIX:
+        info = path;
+        break;
 
-private:
-    ContextUPtr _connect() const;
+    default:
+        // Never goes here.
+        throw Error("unknown connection type");
+    }
 
-    redisContext* _connect_tcp() const;
+    return info;
+}
 
-    redisContext* _connect_unix() const;
-
-    void _set_socket_timeout(redisContext &ctx) const;
-
-    void _enable_keep_alive(redisContext &ctx) const;
-
-    timeval _to_timeval(const std::chrono::milliseconds &dur) const;
-
-    const ConnectionOptions &_opts;
-};
+namespace original {
+namespace connection {
 
 Connection::Connector::Connector(const ConnectionOptions &opts) : _opts(opts) {}
 
@@ -153,25 +153,6 @@ timeval Connection::Connector::_to_timeval(const std::chrono::milliseconds &dur)
     t.tv_sec = sec.count();
     t.tv_usec = msec.count();
     return t;
-}
-
-std::string ConnectionOptions::_server_info() const {
-    std::string info;
-    switch (type) {
-    case ConnectionType::TCP:
-        info = host + ":" + std::to_string(port);
-        break;
-
-    case ConnectionType::UNIX:
-        info = path;
-        break;
-
-    default:
-        // Never goes here.
-        throw Error("unknown connection type");
-    }
-
-    return info;
 }
 
 void swap(Connection &lhs, Connection &rhs) noexcept {
@@ -288,7 +269,7 @@ void Connection::_enable_readonly() {
 }
 
 void Connection::_set_resp_version() {
-    cmd::hello(*this, _opts.resp);
+    cmd::hello(*reinterpret_cast<sw::redis::Connection *>(this), _opts.resp);
 
     auto reply = recv();
 
@@ -305,10 +286,10 @@ void Connection::_auth() {
     }
 
     if (_opts.user == DEFAULT_USER) {
-        cmd::auth(*this, _opts.password);
+        cmd::auth(*reinterpret_cast<sw::redis::Connection *>(this), _opts.password);
     } else {
         // Redis 6.0 or latter
-        cmd::auth(*this, _opts.user, _opts.password);
+        cmd::auth(*reinterpret_cast<sw::redis::Connection *>(this), _opts.user, _opts.password);
     }
 
     auto reply = recv();
@@ -323,13 +304,16 @@ void Connection::_select_db() {
         return;
     }
 
-    cmd::select(*this, _opts.db);
+    cmd::select(*reinterpret_cast<sw::redis::Connection *>(this), _opts.db);
 
     auto reply = recv();
 
     assert(reply);
 
     reply::parse<void>(*reply);
+}
+
+}
 }
 
 }

@@ -41,6 +41,8 @@ enum class ConnectionType {
     UNIX
 };
 
+class CmdArgs;
+
 struct ConnectionOptions {
     ConnectionOptions() = default;
 
@@ -89,9 +91,12 @@ struct ConnectionOptions {
 
     // For internal use, and might be removed in the future. DO NOT use it in client code.
     std::string _server_info() const;
+
+    std::function<std::pair<std::string, int>(std::string host, int port)> translateAddrCallback;
 };
 
-class CmdArgs;
+namespace original {
+namespace connection {
 
 class Connection {
 public:
@@ -103,7 +108,7 @@ public:
     Connection(Connection &&) = default;
     Connection& operator=(Connection &&) = default;
 
-    ~Connection() = default;
+    virtual ~Connection() = default;
 
     // Check if the connection is broken. Client needs to do this check
     // before sending some command to the connection. If it's broken,
@@ -122,7 +127,7 @@ public:
         _ctx->err = REDIS_ERR;
     }
 
-    void reconnect();
+    virtual void reconnect();
 
     auto create_time() const
         -> std::chrono::time_point<std::chrono::steady_clock> {
@@ -153,7 +158,7 @@ public:
     void set_push_callback(redisPushFn *push_func);
 #endif
 
-private:
+protected:
     struct Dummy {};
 
     Connection(const ConnectionOptions &opts, Dummy) : _opts(opts) {}
@@ -199,6 +204,28 @@ private:
     tls::TlsContextUPtr _tls_ctx;
 };
 
+class Connection::Connector {
+public:
+    explicit Connector(const ConnectionOptions &opts);
+
+    ContextUPtr connect() const;
+
+protected:
+    ContextUPtr _connect() const;
+
+    virtual redisContext* _connect_tcp() const;
+
+    redisContext* _connect_unix() const;
+
+    void _set_socket_timeout(redisContext &ctx) const;
+
+    void _enable_keep_alive(redisContext &ctx) const;
+
+    timeval _to_timeval(const std::chrono::milliseconds &dur) const;
+
+    const ConnectionOptions &_opts;
+};
+
 using ConnectionSPtr = std::shared_ptr<Connection>;
 
 enum class Role {
@@ -230,7 +257,12 @@ inline redisContext* Connection::_context() {
 }
 
 }
+}
 
 }
+
+}
+
+#include "sw/redis++/connection_ex.h"
 
 #endif // end SEWENEW_REDISPLUSPLUS_CONNECTION_H

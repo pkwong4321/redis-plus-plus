@@ -14,12 +14,33 @@
    limitations under the License.
  *************************************************************************/
 
-#ifndef SEWENEW_REDISPLUSPLUS_REDISPLUSPLUS_H
-#define SEWENEW_REDISPLUSPLUS_REDISPLUSPLUS_H
+#ifndef SEWENEW_REDISPLUSPLUS_REDIS_EX_H
+#define SEWENEW_REDISPLUSPLUS_REDIS_EX_H
 
-#include "sw/redis++/redis_ex.h"
-#include "sw/redis++/redis_cluster_ex.h"
-#include "sw/redis++/queued_redis.h"
-#include "sw/redis++/sentinel.h"
+#include <string>
+#include "sw/redis++/redis.h"
 
-#endif // end SEWENEW_REDISPLUSPLUS_REDISPLUSPLUS_H
+namespace sw {
+
+namespace redis {
+
+class RedisEx: public Redis
+{
+private:
+    friend class RedisClusterEx;
+
+    explicit RedisEx(const GuardedConnectionSPtr &connection);
+
+public:
+    explicit RedisEx(const ConnectionOptions &connection_opts,
+                     const ConnectionPoolOptions &pool_opts = {});
+
+    Connection fetchInternalConnection();
+    void releaseInternalConnection(Connection connection);
+};
+
+}
+
+}
+
+#endif

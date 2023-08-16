@@ -1383,7 +1383,7 @@ public:
     long long xtrim(const StringView &key, const StringView &threshold,
             XtrimStrategy strategy, long long limit);
 
-private:
+protected:
     explicit RedisCluster(const Uri &uri);
 
     class Command {
