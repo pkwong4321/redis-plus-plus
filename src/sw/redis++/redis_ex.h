@@ -34,6 +34,11 @@ private:
 public:
     explicit RedisEx(const ConnectionOptions &connection_opts,
                      const ConnectionPoolOptions &pool_opts = {});
+    explicit RedisEx(const std::shared_ptr<Sentinel> &sentinel,
+                     const std::string &master_name,
+                     Role role,
+                     const ConnectionOptions &connection_opts,
+                     const ConnectionPoolOptions &pool_opts = {});
 
     Connection fetchInternalConnection();
     void releaseInternalConnection(Connection connection);

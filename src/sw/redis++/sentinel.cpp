@@ -374,6 +374,7 @@ std::list<ConnectionOptions> Sentinel::_parse_options(const SentinelOptions &opt
         opt.socket_timeout = opts.socket_timeout;
         opt.tls = opts.tls;
         opt.resp = opts.resp;
+        opt.translateAddrCallback = opts.translateAddrCallback;
 
         options.push_back(opt);
     }

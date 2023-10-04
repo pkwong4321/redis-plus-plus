@@ -51,6 +51,8 @@ struct SentinelOptions {
     tls::TlsOptions tls;
 
     int resp = 2;
+
+    std::function<std::pair<std::string, int>(std::string host, int port)> translateAddrCallback;
 };
 
 class Sentinel {

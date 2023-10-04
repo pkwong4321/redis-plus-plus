@@ -28,8 +28,14 @@ RedisEx::RedisEx(const GuardedConnectionSPtr &connection): Redis(connection)
 
 }
 
+RedisEx::RedisEx(const std::shared_ptr<Sentinel> &sentinel, const std::string &master_name, Role role, const ConnectionOptions &connection_opts, const ConnectionPoolOptions &pool_opts): Redis(sentinel, master_name, role, connection_opts, pool_opts)
+{
+
+}
+
 RedisEx::RedisEx(const ConnectionOptions &connection_opts, const ConnectionPoolOptions &pool_opts): Redis(connection_opts, pool_opts)
 {
+
 }
 
 Connection RedisEx::fetchInternalConnection()
