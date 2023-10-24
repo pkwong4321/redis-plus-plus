@@ -55,7 +55,7 @@ struct NodeHash {
 
 using Shards = std::map<SlotRange, Node>;
 
-class RedirectionError : public ReplyError {
+class REDISPLUSPLUS_EXPORT RedirectionError : public ReplyError {
 public:
     RedirectionError(const std::string &msg);
 
@@ -82,7 +82,7 @@ private:
     Node _node;
 };
 
-class MovedError : public RedirectionError {
+class REDISPLUSPLUS_EXPORT MovedError : public RedirectionError {
 public:
     explicit MovedError(const std::string &msg) : RedirectionError(msg) {}
 
@@ -95,7 +95,7 @@ public:
     virtual ~MovedError() override = default;
 };
 
-class AskError : public RedirectionError {
+class REDISPLUSPLUS_EXPORT AskError : public RedirectionError {
 public:
     explicit AskError(const std::string &msg) : RedirectionError(msg) {}
 

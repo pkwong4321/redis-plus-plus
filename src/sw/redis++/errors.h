@@ -21,6 +21,12 @@
 #include <string>
 #include <hiredis/hiredis.h>
 
+#if defined(_WIN32) || defined(_WIN64)
+#define REDISPLUSPLUS_EXPORT __declspec(dllexport)
+#elif defined(__APPLE__) || defined(__linux__)
+#define REDISPLUSPLUS_EXPORT __attribute__ ((visibility("default")))
+#endif
+
 namespace sw {
 
 namespace redis {
@@ -31,7 +37,7 @@ enum ReplyErrorType {
     ASK
 };
 
-class Error : public std::exception {
+class REDISPLUSPLUS_EXPORT Error : public std::exception {
 public:
     explicit Error(const std::string &msg) : _msg(msg) {}
 
@@ -51,7 +57,7 @@ private:
     std::string _msg;
 };
 
-class IoError : public Error {
+class REDISPLUSPLUS_EXPORT IoError : public Error {
 public:
     explicit IoError(const std::string &msg) : Error(msg) {}
 
@@ -64,7 +70,7 @@ public:
     virtual ~IoError() override = default;
 };
 
-class TimeoutError : public IoError {
+class REDISPLUSPLUS_EXPORT TimeoutError : public IoError {
 public:
     explicit TimeoutError(const std::string &msg) : IoError(msg) {}
 
@@ -77,7 +83,7 @@ public:
     virtual ~TimeoutError() override = default;
 };
 
-class ClosedError : public Error {
+class REDISPLUSPLUS_EXPORT ClosedError : public Error {
 public:
     explicit ClosedError(const std::string &msg) : Error(msg) {}
 
@@ -90,7 +96,7 @@ public:
     virtual ~ClosedError() override = default;
 };
 
-class ProtoError : public Error {
+class REDISPLUSPLUS_EXPORT ProtoError : public Error {
 public:
     explicit ProtoError(const std::string &msg) : Error(msg) {}
 
@@ -103,7 +109,7 @@ public:
     virtual ~ProtoError() override = default;
 };
 
-class OomError : public Error {
+class REDISPLUSPLUS_EXPORT OomError : public Error {
 public:
     explicit OomError(const std::string &msg) : Error(msg) {}
 
@@ -116,7 +122,7 @@ public:
     virtual ~OomError() override = default;
 };
 
-class ReplyError : public Error {
+class REDISPLUSPLUS_EXPORT ReplyError : public Error {
 public:
     explicit ReplyError(const std::string &msg) : Error(msg) {}
 
@@ -129,7 +135,7 @@ public:
     virtual ~ReplyError() override = default;
 };
 
-class WatchError : public Error {
+class REDISPLUSPLUS_EXPORT WatchError : public Error {
 public:
     explicit WatchError() : Error("Watched key has been modified") {}
 
