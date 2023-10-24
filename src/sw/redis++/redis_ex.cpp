@@ -23,6 +23,60 @@ namespace sw {
 
 namespace redis {
 
+std::tuple<ReplyUPtr, std::string, std::string> funcWithErrorHandle(const std::function<ReplyUPtr ()> &func)
+{
+    if (!func())
+        return {nullptr, "", "func not defined"};
+
+    std::string exception = "";
+    std::string error = "";
+
+    try {
+        return {func(), "", ""};
+    } catch (const sw::redis::WatchError &e) {
+        exception = "WatchError";
+        error = e.what();
+    } catch (const sw::redis::OomError &e) {
+        exception = "OomError";
+        error = e.what();
+    } catch (const sw::redis::ProtoError &e) {
+        exception = "ProtoError";
+        error = e.what();
+    } catch (const sw::redis::ClosedError &e) {
+        exception = "ClosedError";
+        error = e.what();
+    } catch (const sw::redis::TimeoutError &e) {
+        exception = "TimeoutError";
+        error = e.what();
+    } catch (const sw::redis::IoError &e) {
+        exception = "IoError";
+        error = e.what();
+    } catch (const sw::redis::MovedError &e) {
+        exception = "MovedError";
+        error = e.what();
+    } catch (const sw::redis::AskError &e) {
+        exception = "AskError";
+        error = e.what();
+    } catch (const sw::redis::RedirectionError &e) {
+        exception = "RedirectionError";
+        error = e.what();
+    } catch (const sw::redis::ReplyError &e) {
+        exception = "ReplyError";
+        error = e.what();
+    } catch (const sw::redis::Error &e) {
+        exception = "Error";
+        error = e.what();
+    } catch (const std::exception &e) {
+        exception = "std::exception";
+        error = e.what();
+    } catch (...) {
+        exception = "...";
+        error = "Unknown exception";
+    }
+
+    return {nullptr, exception, error};
+}
+
 RedisEx::RedisEx(const GuardedConnectionSPtr &connection): Redis(connection)
 {
 

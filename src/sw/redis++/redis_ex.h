@@ -24,6 +24,9 @@ namespace sw {
 
 namespace redis {
 
+auto funcWithErrorHandle(const std::function<ReplyUPtr()>& func)
+    -> std::tuple<ReplyUPtr, std::string, std::string>;
+
 class RedisEx: public Redis
 {
 private:
